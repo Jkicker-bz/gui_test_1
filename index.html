@@ -4,24 +4,34 @@
   <meta charset="UTF-8">
   <title>CineSearch Pro</title>
   <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
   <script src="app.js" defer></script>
-</head>
-<body>
-  <div class="app">
 
+</head> 
+<body>
+
+  <div class="app">
     <header>
-        <span>CineSearch Pro</span>
+          <span class="logo"><span style="color: var(--accent)">Cine</span>Search Pro</span> <div id="search-wrap" data-loading="false">
         <div id="search-wrap" data-loading="false">
-        <input type="text" id="search-input" placeholder="Search for a movie...."> 
+          <input type="text" id="search-input" placeholder="Search for a movie...."> 
           <div class="spinner"></div>
-      </div>
+        </div>
       </header>
 
     <aside>
        <h2>Results</h2>
+       <template id="result-template">
+          <li class="result-item">
+              <div class="result-poster">🎬</div>
+              <div class="result-info">
+                  <div class="result-title"></div>
+                  <div class="result-meta"></div>
+              </div>
+              <div class="result-rating"></div>
+          </li>
+       </template>
        <ul id="result-list">
-        <li>Movie Title Here</li>
-        <li>Movie Title Here</li>
        </ul>
     </aside>
 
@@ -34,6 +44,5 @@
     </main>
 
   </div>
-
 </body>
 </html>
