@@ -58,7 +58,12 @@ class SearchComponent {
     });
   }
 
-  showDetail(movie) {
+  showDetail(movie, element) {
+    if (this.activeElement) {
+      this.activeElement.classList.remove("active");
+    }
+    this.activeElement = element;
+    element.classList.add("active");
     this.detailPanel.innerHTML = `
         <h2>${movie.title}</h2>
         <p>${movie.tagline}</p>
@@ -76,7 +81,7 @@ class SearchComponent {
 
       const item = clone.querySelector(".result-item");
       item.addEventListener("click", () => {
-        this.showDetail(movie);
+        this.showDetail(movie, item);
       });
       frag.appendChild(clone);
     });
