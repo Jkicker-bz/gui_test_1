@@ -40,9 +40,10 @@ const MOVIES = [
   let activeElement = null;
   let activeIndex   = -1;
   let debounceTimer = null;
+  let controller = null;
   const cache       = new Map();
 
-  function renderResults(movies) {
+  function renderResults(movies, query = '') {
     const frag = new DocumentFragment;
 
     movies.forEach(movie => {
@@ -73,6 +74,28 @@ const MOVIES = [
     `;
   }
 
+  async function search(query) {
+    if(controller) controller.abort();
+    controller = new AbortController();  
+
+  const API_KEY = "7ab7944f73f89f374b5e3acce87eae40";
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`;
+
+  try {
+    searchWrap.dataset.loading = 'true';
+    const response = await fetch(url, { signal: controller.signal });
+    const data = await response.json();
+    cache.set(query, data.results);
+    renderResults(data.results, query);
+  } catch (err) {
+    if(err.name === 'AbortError') return;
+    console.error('Fetch failed:', err);
+  } finally {
+    searchWrap.dataset.loading = 'false';
+  }
+}
+
+
   searchInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
 
@@ -89,12 +112,7 @@ const MOVIES = [
         return;
       }
 
-      const filtered = MOVIES.filter(movie =>
-        movie.title.toLowerCase().includes(query.toLowerCase())
-      );
-      
-      cache.set(query, filtered);
-      renderResults(filtered);
+      search(query);
     }, 300);
   });
 
