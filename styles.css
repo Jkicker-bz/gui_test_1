@@ -140,3 +140,132 @@ body {
   color: var(--accent);
   font-weight: 600;
 }
+
+/* sidebar scrolls independently */
+aside {
+  overflow-y: auto;
+  height: 100%;
+}
+
+/* sidebar header */
+.sidebar-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+
+.sidebar-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+#result-count {
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(245, 130, 13, 0.1);
+  border: 1px solid rgba(245, 130, 13, 0.3);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* spinner visibility */
+#search-wrap[data-loading="true"] .spinner {
+  opacity: 1;
+}
+
+/* detail panel */
+main {
+  grid-area: detail;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.detail-backdrop {
+  width: 100%;
+  height: 280px;
+  background-size: cover;
+  background-position: center top;
+  position: relative;
+}
+
+.detail-backdrop::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 140px;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+}
+
+#detail-panel h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  padding: 0 32px;
+}
+
+#detail-panel .tagline {
+  font-style: italic;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  padding: 0 32px;
+  font-size: 15px;
+}
+
+#detail-panel h3 {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 8px;
+  margin-top: 24px;
+  padding: 0 32px;
+}
+
+#detail-panel p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  max-width: 600px;
+  padding: 0 32px;
+}
+
+/* trailer button */
+.trailer-btn {
+  display: inline-block;
+  margin-top: 8px;
+  margin-left: 32px;
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #000;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  transition: opacity 0.15s;
+}
+
+.trailer-btn:hover {
+  opacity: 0.85;
+}
+
+/* empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: 14px;
+  gap: 8px;
+}

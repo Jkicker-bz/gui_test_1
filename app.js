@@ -1,38 +1,5 @@
 const API_KEY = "7ab7944f73f89f374b5e3acce87eae40";
 
-const MOVIES = [
-  {
-    id: 1,
-    title: "Inception",
-    year: 2010,
-    genre: "Sci-Fi",
-    rating: 8.8,
-    overview:
-      "A thief who steals corporate secrets through dream-sharing technology is given the task of planting an idea.",
-    tagline: "Your mind is the scene of the crime.",
-  },
-  {
-    id: 2,
-    title: "Interstellar",
-    year: 2014,
-    genre: "Sci-Fi",
-    rating: 8.6,
-    overview:
-      "A team of explorers travel through a wormhole in space to ensure humanity's survival.",
-    tagline: "Mankind was born on Earth. It was never meant to die here.",
-  },
-  {
-    id: 3,
-    title: "In Bruges",
-    year: 2008,
-    genre: "Crime",
-    rating: 7.9,
-    overview:
-      "Hitman Ray and his partner await orders in Bruges, Belgium after a job gone wrong.",
-    tagline: "Shoot first. Sightsee later.",
-  },
-];
-
 const GENRES = {
   28: "Action",
   12: "Adventure",
@@ -69,6 +36,19 @@ function renderResults(movies, query = "") {
   movies.forEach((movie) => {
     const clone = template.content.cloneNode(true);
 
+    const poster = clone.querySelector('.result-poster');
+    if (movie.poster_path) {
+      const img = document.createElement('img');
+      img.src = `https://image.tmdb.org/t/p/w92${movie.poster_path}`;
+      img.alt = movie.title;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '4px';
+      poster.innerHTML = '';
+      poster.appendChild(img);
+    }
+
     const titleEl = clone.querySelector(".result-title");
     titleEl.appendChild(buildHighlightedTitle(movie.title, query));
     
@@ -84,6 +64,8 @@ function renderResults(movies, query = "") {
   });
   resultList.innerHTML = "";
   resultList.appendChild(frag);
+
+  document.getElementById('result-count').textContent = `${movies.length} found`;
 }
 
 function buildHighlightedTitle(title, query) {
@@ -214,10 +196,12 @@ searchInput.addEventListener("input", () => {
   clearTimeout(debounceTimer);
 
   debounceTimer = setTimeout(() => {
+    activeIndex = -1;
     const query = searchInput.value.trim();
 
     if (!query) {
-      renderResults(MOVIES);
+      activeIndex = -1;
+      showEmptyState()
       return;
     }
 
@@ -240,7 +224,10 @@ searchInput.addEventListener('keydown', e => {
     e.preventDefault();
     activeIndex = Math.max(activeIndex -1, 0);
   } else if (e.key === 'Enter') {
-    if (activeIndex >= 0) items[activeIndex].click();
+    if (activeIndex >= 0) {
+      items[activeIndex].click();
+      searchInput.focus();
+    }
     return;
   } else {
     return;
@@ -251,4 +238,20 @@ searchInput.addEventListener('keydown', e => {
   items[activeIndex].scrollIntoView({ block: 'nearest'});
 });
 
-renderResults(MOVIES);
+function showEmptyState() {
+  detailPanel.innerHTML = '';
+  const empty = document.createElement('div');
+  empty.className = 'empty-state';
+  const icon = document.createElement('div');
+  icon.textContent = '🎬';
+  icon.style.fontSize =  '48px';
+  icon.style.marginBottom = '16px';
+  const msg = document.createElement('p');
+  msg.textContent = 'Search for a movie to get Started';
+
+  empty.appendChild(icon);
+  empty.appendChild(msg);
+  detailPanel.appendChild(empty);
+}
+
+showEmptyState();
