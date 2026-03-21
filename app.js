@@ -84,9 +84,16 @@ const MOVIES = [
         return;
       }
 
+      if (cache.has(query)) {
+        renderResults(cache.get(query));
+        return;
+      }
+
       const filtered = MOVIES.filter(movie =>
-        movie.title.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+        movie.title.toLowerCase().includes(query.toLowerCase())
       );
+      
+      cache.set(query, filtered);
       renderResults(filtered);
     }, 300);
   });
