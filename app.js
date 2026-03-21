@@ -39,6 +39,7 @@ const MOVIES = [
 
   let activeElement = null;
   let activeIndex   = -1;
+  let debounceTimer = null;
   const cache       = new Map();
 
   function renderResults(movies) {
@@ -73,17 +74,21 @@ const MOVIES = [
   }
 
   searchInput.addEventListener('input', () => {
-    const query = searchInput.value.trim();
+    clearTimeout(debounceTimer);
 
-    if(!query) {
-      renderResults(MOVIES);
-      return;
-    }
+    debounceTimer = setTimeout(() => {
+      const query = searchInput.value.trim();
 
-    const filtered = MOVIES.filter(movie => 
-      movie.title.toLowerCase().includes(query.toLowerCase())
-    );
-    renderResults(filtered);
+      if (!query) {
+        renderResults(MOVIES);
+        return;
+      }
+
+      const filtered = MOVIES.filter(movie =>
+        movie.title.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+      );
+      renderResults(filtered);
+    }, 300);
   });
 
   renderResults(MOVIES);
