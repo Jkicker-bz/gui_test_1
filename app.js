@@ -230,4 +230,25 @@ searchInput.addEventListener("input", () => {
   }, 300);
 });
 
+searchInput.addEventListener('keydown', e => {
+  const items = resultList.querySelectorAll('.result-item');
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    activeIndex = Math.min(activeIndex + 1, items.length - 1);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    activeIndex = Math.max(activeIndex -1, 0);
+  } else if (e.key === 'Enter') {
+    if (activeIndex >= 0) items[activeIndex].click();
+    return;
+  } else {
+    return;
+  }
+
+  items.forEach(item => item.classList.remove('active'));
+  items[activeIndex].classList.add('active');
+  items[activeIndex].scrollIntoView({ block: 'nearest'});
+});
+
 renderResults(MOVIES);
