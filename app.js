@@ -1,3 +1,38 @@
+const API_KEY = "7ab7944f73f89f374b5e3acce87eae40";
+
+const MOVIES = [
+  {
+    id: 1,
+    title: "Inception",
+    year: 2010,
+    genre: "Sci-Fi",
+    rating: 8.8,
+    overview:
+      "A thief who steals corporate secrets through dream-sharing technology is given the task of planting an idea.",
+    tagline: "Your mind is the scene of the crime.",
+  },
+  {
+    id: 2,
+    title: "Interstellar",
+    year: 2014,
+    genre: "Sci-Fi",
+    rating: 8.6,
+    overview:
+      "A team of explorers travel through a wormhole in space to ensure humanity's survival.",
+    tagline: "Mankind was born on Earth. It was never meant to die here.",
+  },
+  {
+    id: 3,
+    title: "In Bruges",
+    year: 2008,
+    genre: "Crime",
+    rating: 7.9,
+    overview:
+      "Hitman Ray and his partner await orders in Bruges, Belgium after a job gone wrong.",
+    tagline: "Shoot first. Sightsee later.",
+  },
+];
+
 const GENRES = {
   28: "Action",
   12: "Adventure",
@@ -33,14 +68,16 @@ function renderResults(movies, query = "") {
 
   movies.forEach((movie) => {
     const clone = template.content.cloneNode(true);
-  clone.querySelector(".result-title").textContent = movie.title;
 
-  const genre = GENRES[movie.genre_ids?.[0]] ?? movie.genre ?? "N/A";
-  clone.querySelector(".result-meta").textContent =
-    `${movie.release_date?.slice(0, 4) ?? movie.year} · ${genre}`;
-  clone.querySelector(".result-rating").textContent =
-   `★ ${movie.vote_average?.toFixed(1) ?? movie.rating}`;
-   
+    const titleEl = clone.querySelector(".result-title");
+    titleEl.appendChild(buildHighlightedTitle(movie.title, query));
+    
+    const genre = GENRES[movie.genre_ids?.[0]] ?? movie.genre ?? "N/A";
+    clone.querySelector(".result-meta").textContent =
+      `${movie.release_date?.slice(0, 4) ?? movie.year} · ${genre}`;
+    clone.querySelector(".result-rating").textContent =
+      `★ ${movie.vote_average?.toFixed(1) ?? movie.rating}`;
+
     const item = clone.querySelector(".result-item");
     item.addEventListener("click", () => showDetail(movie, item));
     frag.appendChild(clone);
@@ -49,25 +86,114 @@ function renderResults(movies, query = "") {
   resultList.appendChild(frag);
 }
 
-function showDetail(movie, element) {
+function buildHighlightedTitle(title, query) {
+  const container = document.createElement('span');
+  if(!query) { container.textContent = title; return container; }
+  const idx = title.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) { container.textContent = title; return container; }
+
+  const before = document.createTextNode(title.slice(0, idx));
+  const match = document.createElement('span');
+  const after = document.createTextNode(title.slice(idx + query.length));
+  match.className = 'highlight';
+  match.textContent = title.slice(idx, idx + query.length);
+  container.appendChild(before);
+  container.appendChild(match);
+  container.appendChild(after);
+  return container;
+}
+
+async function showDetail(movie, element) {
   if (activeElement) {
     activeElement.classList.remove("active");
   }
   activeElement = element;
   element.classList.add("active");
 
-  detailPanel.innerHTML = `
-    <h2>${movie.title}</h2>
-    <p>${movie.tagline}</p>
-    <p>${movie.overview}</p>
-    `;
+  const id = movie.id;
+
+  const [detailRes, creditsRes, videosRes] = await Promise.allSettled([
+    fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}`),
+    fetch(
+      `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${API_KEY}`,
+    ),
+    fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`),
+  ]);
+
+  const details =
+    detailRes.status === "fulfilled" ? await detailRes.value.json() : null;
+  const credits =
+    creditsRes.status === "fulfilled" ? await creditsRes.value.json() : null;
+  const videos =
+    videosRes.status === "fulfilled" ? await videosRes.value.json() : null;
+
+  detailPanel.innerHTML = "";
+
+  if (details?.backdrop_path) {
+    const backdrop = document.createElement("div");
+    backdrop.className = "detail-backdrop";
+    backdrop.style.backgroundImage = `url(https://image.tmdb.org/t/p/w1280${details.backdrop_path})`;
+    detailPanel.appendChild(backdrop);
+  }
+
+  if (details) {
+    const title = document.createElement("h2");
+    title.textContent = details.title;
+
+    const tagline = document.createElement("p");
+    tagline.className = "tagline";
+    tagline.textContent = details.tagline;
+
+    const overview = document.createElement("p");
+    overview.className = "overview";
+    overview.textContent = details.overview;
+
+    detailPanel.appendChild(title);
+    detailPanel.appendChild(tagline);
+    detailPanel.appendChild(overview);
+  }
+
+  if (credits) {
+    const castTitle = document.createElement("h3");
+    castTitle.textContent = "Cast";
+
+    const cast = document.createElement("p");
+    cast.textContent = credits.cast
+      .slice(0, 5)
+      .map((c) => c.name)
+      .join(", ");
+
+    detailPanel.appendChild(castTitle);
+    detailPanel.appendChild(cast);
+  }
+
+  if (videos) {
+    const trailer = videos.results.find(
+      (v) => v.type === "Trailer" && v.site === "YouTube",
+    );
+    const videoTitle = document.createElement("h3");
+    videoTitle.textContent = "Trailer";
+    detailPanel.appendChild(videoTitle);
+
+    if (trailer) {
+      const btn = document.createElement("a");
+      btn.href = `https://www.youtube.com/watch?v=${trailer.key}`;
+      btn.target = "_blank";
+      btn.textContent = "▶  Watch Trailer";
+      btn.className = "trailer-btn";
+      detailPanel.appendChild(btn);
+    } else {
+      const noTrailer = document.createElement("p");
+      noTrailer.textContent = "No Trailer Available";
+      detailPanel.appendChild(noTrailer);
+    }
+  }
 }
 
 async function search(query) {
   if (controller) controller.abort();
   controller = new AbortController();
 
-  const API_KEY = "7ab7944f73f89f374b5e3acce87eae40";
   const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`;
 
   try {
