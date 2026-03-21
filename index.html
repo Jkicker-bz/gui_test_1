@@ -6,21 +6,23 @@
   <link rel="stylesheet" href="styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
   <script src="app.js" defer></script>
-
 </head> 
 <body>
 
   <div class="app">
+
     <header>
           <span class="logo"><span style="color: var(--accent)">Cine</span>Search Pro</span> <div id="search-wrap" data-loading="false">
-        <div id="search-wrap" data-loading="false">
           <input type="text" id="search-input" placeholder="Search for a movie...."> 
           <div class="spinner"></div>
         </div>
       </header>
 
     <aside>
-       <h2>Results</h2>
+       <div class="sidebar-header">
+        <span class="sidebar-label">Results</span>
+        <span id="result-count"></span>
+       </div>
        <template id="result-template">
           <li class="result-item">
               <div class="result-poster">🎬</div>
@@ -37,9 +39,6 @@
 
     <main>
        <div id="detail-panel">
-        <h2>Movie title</h2>
-        <p>Details</p>
-        <p>more details</p>
        </div>
     </main>
 

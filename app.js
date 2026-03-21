@@ -31,64 +31,59 @@ const MOVIES = [
   },
 ];
 
-class SearchComponent {
-  constructor() {
-    this.searchInput = document.getElementById("search-input");
-    this.resultList = document.getElementById("result-list");
-    this.detailPanel = document.getElementById("detail-panel");
-    this.searchWrap = document.getElementById("search-wrap");
-    this.template = document.getElementById("result-template");
+  const searchInput = document.getElementById('search-input');
+  const resultList  = document.getElementById('result-list');
+  const detailPanel = document.getElementById('detail-panel');
+  const searchWrap  = document.getElementById('search-wrap');
+  const template    = document.getElementById('result-template');
 
-    this.activeIndex = -1;
-    this.cache = new Map();
+  let activeElement = null;
+  let activeIndex   = -1;
+  const cache       = new Map();
 
-    this.renderResults(MOVIES);
-    this.searchInput.addEventListener("input", () => {
-      const query = this.searchInput.value.trim();
+  function renderResults(movies) {
+    const frag = new DocumentFragment;
 
-      if (!query) {
-        this.renderResults(MOVIES);
-        return;
-      }
+    movies.forEach(movie => {
+      const clone = template.content.cloneNode(true);
+      clone.querySelector('.result-title').textContent = movie.title;
+      clone.querySelector('.result-meta').textContent = `${movie.year} · ${movie.genre}`;
+      clone.querySelector('.result-rating').textContent = `★ ${movie.rating}`;
 
-      const filtered = MOVIES.filter((movie) =>
-        movie.title.toLowerCase().includes(query.toLowerCase()),
-      );
-      this.renderResults(filtered);
-    });
-  }
-
-  showDetail(movie, element) {
-    if (this.activeElement) {
-      this.activeElement.classList.remove("active");
-    }
-    this.activeElement = element;
-    element.classList.add("active");
-    this.detailPanel.innerHTML = `
-        <h2>${movie.title}</h2>
-        <p>${movie.tagline}</p>
-        <p>${movie.overview}</p>
-        `;
-  }
-  renderResults(movies) {
-    const frag = new DocumentFragment();
-    movies.forEach((movie) => {
-      const clone = this.template.content.cloneNode(true);
-      clone.querySelector(".result-title").textContent = movie.title;
-      clone.querySelector(".result-meta").textContent =
-        `${movie.year} · ${movie.genre}`;
-      clone.querySelector(".result-rating").textContent = `★ ${movie.rating}`;
-
-      const item = clone.querySelector(".result-item");
-      item.addEventListener("click", () => {
-        this.showDetail(movie, item);
-      });
+      const item = clone.querySelector('.result-item');
+      item.addEventListener('click', () => showDetail(movie, item));
       frag.appendChild(clone);
     });
-
-    this.resultList.innerHTML = "";
-    this.resultList.appendChild(frag);
+    resultList.innerHTML = '';
+    resultList.appendChild(frag);
   }
-}
+  
+  function showDetail(movie, element) {
+    if (activeElement) {
+      activeElement.classList.remove('active');
+    }
+    activeElement = element;
+    element.classList.add('active');
 
-new SearchComponent();
+    detailPanel.innerHTML = `
+    <h2>${movie.title}</h2>
+    <p>${movie.tagline}</p>
+    <p>${movie.overview}</p>
+    `;
+  }
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim();
+
+    if(!query) {
+      renderResults(MOVIES);
+      return;
+    }
+
+    const filtered = MOVIES.filter(movie => 
+      movie.title.toLowerCase().includes(query.toLowerCase())
+    );
+    renderResults(filtered);
+  });
+
+  renderResults(MOVIES);
